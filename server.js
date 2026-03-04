@@ -16,8 +16,8 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "https://69a868007320130007096d7a--hrmsdashboardfrontend.netlify.app",
       "http://localhost:5173",
+      "https://hrmsdashboardfrontend.netlify.app",
     ],
     credentials: true,
   }),
