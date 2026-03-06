@@ -153,7 +153,7 @@ export const updateProfile = async (req, res) => {
     const employeeId = req.user.employeeId;
     let updates = req.body;
     if (req.file) {
-      updates.profileImage = req.file.filename; // save path to MongoDB
+      updates.profileImage = `uploads/profilePics/${req.file.filename}`; // save path to MongoDB
     }
     const employee = await Employee.findByIdAndUpdate(employeeId, updates, {
       new: true,
