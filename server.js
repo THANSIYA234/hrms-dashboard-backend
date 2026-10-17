@@ -32,7 +32,7 @@ app.use("/api/attendance", attendenceRoutes);
 app.use("/api/leave", leaveRoutes);
 app.use("/uploads/profilePics", express.static("uploads/profilePics"));
 app.use("/api/notifications", notificationRoutes);
-connectDB();
+await connectDB();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
