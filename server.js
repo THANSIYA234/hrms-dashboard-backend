@@ -5,7 +5,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import employeeRoutes from "./routes/employeeRoutes.js";
 import departmentRoutes from "./routes/departmentRoutes.js";
-import attendenceRoutes from "./routes/attendenceRoutes.js";
+import attendanceRoutes from "./routes/attendanceRoutes.js";
 import leaveRoutes from "./routes/leaveRoutes.js";
 import notificationRoutes from "./routes/notification.Routes.js";
 import cookieParser from "cookie-parser";
@@ -28,7 +28,7 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/auth", authRoutes);
 app.use("/api/employee", employeeRoutes);
 app.use("/api/department", departmentRoutes);
-app.use("/api/attendance", attendenceRoutes);
+app.use("/api/attendance", attendanceRoutes);
 app.use("/api/leave", leaveRoutes);
 app.use("/uploads/profilePics", express.static("uploads/profilePics"));
 app.use("/api/notifications", notificationRoutes);
@@ -36,5 +36,5 @@ await connectDB();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`server is running on port ${PORT}`);
+  console.error(`server is running on port ${PORT}`);
 });

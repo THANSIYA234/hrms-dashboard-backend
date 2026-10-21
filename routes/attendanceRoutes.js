@@ -2,14 +2,14 @@ import express from "express";
 import {
   createPunchIn,
   createPunchOut,
-  getAttendenceHistory,
-  getTodayAttendence,
-} from "../controllers/attendence.controller.js";
+  getAttendanceHistory,
+  getTodayAttendance,
+} from "../controllers/attendance.controller.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 import { authorizeRole } from "../middleware/roleMiddleWare.js";
 import {
-  deleteAttendenceById,
-  filterAttendenceByDate,
+  deleteAttendanceById,
+  filterAttendanceByDate,
   getAllAttendance,
   getAttendanceByFilters,
   getAttendanceStats,
@@ -20,7 +20,7 @@ import {
   getTotalWorkHoursByDate,
   getTotalWorkHoursByDepartment,
   getTotalWorkHoursByEmployee,
-  updateAttendence,
+  updateAttendance,
 } from "../controllers/admin.controller.js";
 
 const router = express.Router();
@@ -28,8 +28,8 @@ const router = express.Router();
 //employee
 router.post("/punch-in", authMiddleware, createPunchIn);
 router.post("/punch-out", authMiddleware, createPunchOut);
-router.get("/today-attendance", authMiddleware, getTodayAttendence);
-router.get("/my-history", authMiddleware, getAttendenceHistory);
+router.get("/today-attendance", authMiddleware, getTodayAttendance);
+router.get("/my-history", authMiddleware, getAttendanceHistory);
 
 //admin
 router.get("/", authMiddleware, getAllAttendance);
@@ -51,20 +51,20 @@ router.get(
   "/filter",
   authMiddleware,
 
-  filterAttendenceByDate,
+  filterAttendanceByDate,
 );
 
 router.put(
   "/update/:id",
   authMiddleware,
   authorizeRole("admin"),
-  updateAttendence,
+  updateAttendance,
 );
 router.delete(
   "/delete/:id",
   authMiddleware,
   authorizeRole("admin"),
-  deleteAttendenceById,
+  deleteAttendanceById,
 );
 
 router.get(

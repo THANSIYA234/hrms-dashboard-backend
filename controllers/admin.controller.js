@@ -1,10 +1,9 @@
-import mongoose from "mongoose";
-import Attendence from "../models/attendence.js";
+import Attendance from "../models/attendance.js";
 import Leave from "../models/leave.js";
 import Employee from "../models/employee.js";
 import calculateStatus from "../utils/calculate-status.js";
 
-//get all attendence
+//get all attendance
 export const getAllAttendance = async (req, res) => {
   try {
     const { search, department, date } = req.query;
@@ -29,15 +28,15 @@ export const getAllAttendance = async (req, res) => {
     const allEmployees = await Employee.find(empFilter);
 
     // Step 2: get attendance for selected date
-    const attendances = await Attendence.find({
+    const attendances = await Attendance.find({
       date: { $gte: start, $lte: end },
     });
 
     // Step 3: get approved leaves
     const leaves = await Leave.find({
       status: "Approved",
-      fromDate: { $lte: end },
-      toDate: { $gte: start },
+      startDate: { $lte: end },
+      endDate: { $gte: start },
     });
 
     // Step 4: merge into unified list
@@ -75,18 +74,19 @@ export const getAllAttendance = async (req, res) => {
 export const getAttendendenceById = async (req, res) => {
   try {
     const { id } = req.params;
-    const records = await Attendence.find({ employee: id });
-    populate({
-      path: "employee",
-      select: "name email department",
-      populate: {
-        path: "department",
-        select: "name",
-      },
-    }).sort({ date: -1 });
+    const records = await Attendance.find({ employee: id })
+      .populate({
+        path: "employee",
+        select: "name email department",
+        populate: {
+          path: "department",
+          select: "name",
+        },
+      })
+      .sort({ date: -1 });
 
     res.status(200).json({
-      message: "Attendence fetched successfully",
+      message: "Attendance fetched successfully",
       records: records,
     });
   } catch (error) {
@@ -94,9 +94,9 @@ export const getAttendendenceById = async (req, res) => {
   }
 };
 
-// filter attendence by date-range
+// filter attendance by date-range
 
-export const filterAttendenceByDate = async (req, res) => {
+export const filterAttendanceByDate = async (req, res) => {
   try {
     const { start, end } = req.query;
     if (!start && !end) {
@@ -104,19 +104,19 @@ export const filterAttendenceByDate = async (req, res) => {
         .status(400)
         .json({ message: "Start and end dates are required" });
     }
-    const records = await Attendence.find({ date: { $gte: start, $lte: end } });
-
-    populate({
-      path: "employee",
-      select: "name email department",
-      populate: {
-        path: "department",
-        select: "name",
-      },
-    }).sort({ date: -1 });
+    const records = await Attendance.find({ date: { $gte: start, $lte: end } })
+      .populate({
+        path: "employee",
+        select: "name email department",
+        populate: {
+          path: "department",
+          select: "name",
+        },
+      })
+      .sort({ date: -1 });
 
     res.status(200).json({
-      message: `Attendence from ${start} to ${end}`,
+      message: `Attendance from ${start} to ${end}`,
       count: records.length,
       records: records,
     });
@@ -125,14 +125,14 @@ export const filterAttendenceByDate = async (req, res) => {
   }
 };
 
-//update attendence
+//update attendance
 
-export const updateAttendence = async (req, res) => {
+export const updateAttendance = async (req, res) => {
   try {
     const { id } = req.params;
     const { punchIn, punchOut } = req.body;
 
-    const record = await Attendence.findById(id);
+    const record = await Attendance.findById(id);
     if (!record) {
       return res.status(404).json({ message: "No records found" });
     }
@@ -169,27 +169,27 @@ export const updateAttendence = async (req, res) => {
   }
 };
 
-//delete attendence
+//delete attendance
 
-export const deleteAttendenceById = async (req, res) => {
+export const deleteAttendanceById = async (req, res) => {
   try {
     const { id } = req.params;
-    const records = await Attendence.findById(id);
+    const records = await Attendance.findById(id);
 
     if (!records) {
-      return res.status(400).json({ message: "No attendence record found" });
+      return res.status(400).json({ message: "No attendance record found" });
     }
 
-    await Attendence.findByIdAndDelete(id);
+    await Attendance.findByIdAndDelete(id);
     res.status(200).json({
-      message: "Attendence Deleted successfully",
+      message: "Attendance Deleted successfully",
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-//get attendence by filters
+//get attendance by filters
 
 export const getAttendanceByFilters = async (req, res) => {
   try {
@@ -242,7 +242,7 @@ export const getAttendanceByFilters = async (req, res) => {
       attendanceFilter.employee = { $in: employeeIds };
     }
 
-    const records = await Attendence.find(attendanceFilter)
+    const records = await Attendance.find(attendanceFilter)
       .populate({
         path: "employee",
         select: "name department",
@@ -260,7 +260,7 @@ export const getAttendanceByFilters = async (req, res) => {
 
 export const getTotalWorkHours = async (req, res) => {
   try {
-    const records = await Attendence.find();
+    const records = await Attendance.find();
     const totalHours = records.reduce(
       (acc, rec) => acc + (rec.workHours || 0),
       0,
@@ -278,7 +278,7 @@ export const getTotalWorkHours = async (req, res) => {
 export const getTotalWorkHoursByEmployee = async (req, res) => {
   try {
     const { employeeId } = req.params;
-    const records = await Attendence.find({ employee: employeeId });
+    const records = await Attendance.find({ employee: employeeId });
     const totalHours = records.reduce(
       (acc, rec) => acc + (rec.workHours || 0),
       0,
@@ -302,7 +302,7 @@ export const getTotalWorkHoursByDepartment = async (req, res) => {
     );
     const employeeIds = employees.map((emp) => emp._id);
 
-    const records = await Attendence.find({ employee: { $in: employeeIds } });
+    const records = await Attendance.find({ employee: { $in: employeeIds } });
     const totalHours = records.reduce(
       (acc, rec) => acc + (rec.workHours || 0),
       0,
@@ -323,7 +323,7 @@ export const getTotalWorkHoursByDate = async (req, res) => {
     const { date } = req.query;
     if (!date) return res.status(400).json({ message: "Date is required" });
 
-    const records = await Attendence.find({ date });
+    const records = await Attendance.find({ date });
     const totalHours = records.reduce(
       (acc, rec) => acc + (rec.workHours || 0),
       0,
@@ -347,16 +347,16 @@ export const getAttendanceStats = async (req, res) => {
     tomorrow.setDate(today.getDate() + 1);
 
     // Fetch today's attendance
-    const todaysAttendance = await Attendence.find({
+    const todaysAttendance = await Attendance.find({
       date: { $gte: today, $lt: tomorrow },
     });
 
     const allEmployees = await Employee.find();
 
-    // Map attendance by employeeId
+    // Map attendance by employee
     const attendanceMap = new Map();
     todaysAttendance.forEach((a) => {
-      attendanceMap.set(a.employeeId.toString(), a.status);
+      attendanceMap.set(a.employee.toString(), a.status);
     });
 
     let presentToday = 0;
@@ -365,8 +365,8 @@ export const getAttendanceStats = async (req, res) => {
 
     allEmployees.forEach((emp) => {
       const status = attendanceMap.get(emp._id.toString());
-      if (status === "present") presentToday++;
-      else if (status === "leave") leaveToday++;
+      if (status === "Present") presentToday++;
+      else if (status === "Leave") leaveToday++;
       else absentToday++; // either absent or not marked
     });
 
@@ -390,7 +390,7 @@ export const getAttendanceTrend = async (req, res) => {
     thirtyDaysAgo.setDate(today.getDate() - 30);
 
     // Fetch attendance in last 30 days
-    const records = await Attendence.find({
+    const records = await Attendance.find({
       date: { $gte: thirtyDaysAgo, $lte: today },
     });
 
@@ -421,7 +421,7 @@ export const getAttendanceTrend = async (req, res) => {
   }
 };
 
-//get attendence of today
+//get attendance of today
 
 export const getTodayAttendanceSnapshot = async (req, res) => {
   const today = new Date();
@@ -433,15 +433,15 @@ export const getTodayAttendanceSnapshot = async (req, res) => {
   const allEmployees = await Employee.find();
 
   // Step 2: get today's attendance
-  const todaysAttendance = await Attendence.find({
+  const todaysAttendance = await Attendance.find({
     date: { $gte: today, $lt: tomorrow },
   });
 
   // Step 3: get approved leaves for today
   const todaysLeaves = await Leave.find({
     status: "Approved",
-    fromDate: { $lte: today },
-    toDate: { $gte: today },
+    startDate: { $lte: today },
+    endDate: { $gte: today },
   });
 
   // Step 4: merge to generate full attendance list

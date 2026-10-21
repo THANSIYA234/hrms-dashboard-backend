@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const attendenceSchema = new mongoose.Schema(
+const attendanceSchema = new mongoose.Schema(
   {
     employee: {
       type: mongoose.Schema.Types.ObjectId,
@@ -24,5 +24,5 @@ const attendenceSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-const Attendence = mongoose.model("Attendence", attendenceSchema);
-export default Attendence;
+const Attendance = mongoose.model("Attendance", attendanceSchema);
+export default Attendance;

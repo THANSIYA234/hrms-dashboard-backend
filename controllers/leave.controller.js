@@ -169,11 +169,6 @@ export const updateLeave = async (req, res) => {
 
     await leave.save();
 
-    await Notification.create({
-      user: leave.employee,
-      title: `Leave ${status}`,
-      message: `Your leave request has been ${status.toLowerCase()}`,
-    });
     res.json({ message: "Leave updated", leave });
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -224,7 +219,7 @@ export const getBalanceLeave = async (req, res) => {
 
     const approvedLeaves = await Leave.find({
       employee: employeeId,
-      status: "approved",
+      status: "Approved",
     });
 
     let usedDays = 0;
@@ -248,7 +243,6 @@ export const getBalanceLeave = async (req, res) => {
       remaining,
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({ message: error.message });
   }
 };

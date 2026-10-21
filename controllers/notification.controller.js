@@ -40,6 +40,14 @@ export const markAsRead = async (req, res) => {
   if (!notification) {
     return res.status(404).json({ message: "Notification not found" });
   }
+  if (
+    notification.user.toString() !== req.user.id &&
+    req.user.role !== "admin"
+  ) {
+    return res
+      .status(403)
+      .json({ message: "Not authorized to mark this notification" });
+  }
   notification.isRead = true;
   await notification.save();
   res.status(200).json({ message: "Notification marked as read" });
