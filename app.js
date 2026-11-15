@@ -68,7 +68,7 @@ app.use(compression());
 app.use(
   cors({
     origin: (
-      process.env.CORS_ORIGINS || "https://hrmsdashboardfrontend.netlify.app/"
+      process.env.CORS_ORIGINS || "https://hrmsdashboardfrontend.netlify.app"
     )
       .split(",")
       .map((origin) => origin.trim())
