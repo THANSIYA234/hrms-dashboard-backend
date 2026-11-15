@@ -15,8 +15,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
+          cache: 'npm'
           cache-dependency-path: package-lock.json
       - run: npm ci
-      - name: Syntax-check server entry
-        run: node --check server.js
+      - run: npm run lint
+      # Uses an in-memory MongoDB, so no service container is required.
+      - run: npm test

@@ -20,4 +20,9 @@ export default defineConfig([
       ],
     },
   },
+  {
+    // CLI entry points are the one place console output is the interface.
+    files: ["scripts/**/*.js"],
+    rules: { "no-console": "off" },
+  },
 ]);

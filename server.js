@@ -1,40 +1,51 @@
-import dotenv from "dotenv";
-import express from "express";
-import cors from "cors";
+// `dotenv/config` is imported first so .env is populated before any module
+// reads process.env at load time.
+import "dotenv/config";
+
+import mongoose from "mongoose";
+import app, { logger } from "./app.js";
 import connectDB from "./config/db.js";
-import authRoutes from "./routes/authRoutes.js";
-import employeeRoutes from "./routes/employeeRoutes.js";
-import departmentRoutes from "./routes/departmentRoutes.js";
-import attendanceRoutes from "./routes/attendanceRoutes.js";
-import leaveRoutes from "./routes/leaveRoutes.js";
-import notificationRoutes from "./routes/notification.Routes.js";
-import cookieParser from "cookie-parser";
-
-dotenv.config();
-const app = express();
-
-app.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      "https://hrmsdashboardfrontend.netlify.app",
-    ],
-    credentials: true,
-  }),
-);
-app.use(express.json());
-app.use(cookieParser());
-app.use("/uploads", express.static("uploads"));
-app.use("/api/auth", authRoutes);
-app.use("/api/employee", employeeRoutes);
-app.use("/api/department", departmentRoutes);
-app.use("/api/attendance", attendanceRoutes);
-app.use("/api/leave", leaveRoutes);
-app.use("/uploads/profilePics", express.static("uploads/profilePics"));
-app.use("/api/notifications", notificationRoutes);
-await connectDB();
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.error(`server is running on port ${PORT}`);
+
+let server;
+
+async function bootstrap() {
+  await connectDB();
+  server = app.listen(PORT, () => logger.info({ port: PORT }, "server started"));
+}
+
+bootstrap().catch((err) => {
+  logger.fatal({ err }, "bootstrap failed");
+  process.exit(1);
 });
+
+process.on("unhandledRejection", (err) => {
+  logger.error({ err }, "unhandledRejection");
+});
+
+process.on("uncaughtException", (err) => {
+  logger.fatal({ err }, "uncaughtException");
+  process.exit(1);
+});
+
+const shutdown = (signal) => {
+  logger.info({ signal }, "shutting down");
+
+  const forceExit = setTimeout(() => {
+    logger.error("forcing shutdown after timeout");
+    process.exit(1);
+  }, 10_000);
+  forceExit.unref();
+
+  server?.close(async () => {
+    await mongoose.connection.close();
+    clearTimeout(forceExit);
+    process.exit(0);
+  });
+};
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
+
+export default app;
